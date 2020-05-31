@@ -1,0 +1,6 @@
+name: DTRefSystem
+version: ${project.version}
+main: su.dreamtime.dtrefsystem.DTRefSystem
+depend: [DreamTimeAPI]
+authors: [SteveGrKek]
+website: dreamtime.su
