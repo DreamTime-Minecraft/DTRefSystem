@@ -1,0 +1,28 @@
+database:
+  host: localhost
+  port: 3306
+  login: dreamtime
+  password: dreamtime
+  database: dreamtime
+rewards:
+  referrer:
+    vip:
+      coins: 100
+    iron:
+      coins: 250
+    godlike:
+      coins: 500
+    default:
+      coins: 100
+  referal:
+    vip:
+      coins: 100
+    iron:
+      coins: 250
+    godlike:
+      coins: 500
+    default:
+      coins: 100
+settings:
+  need-playtime: 86400
+  time-format: 'SECOND'
