@@ -4,15 +4,14 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.data.DataType;
+import net.luckperms.api.context.ImmutableContextSet;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.node.Node;
-import net.luckperms.api.node.NodeEqualityPredicate;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
-import net.md_5.bungee.api.ChatColor;
+import net.luckperms.api.util.Tristate;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -28,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public final class DTRefSystem extends Plugin  {
+    private static Set<String> ignoreList = new HashSet<>();
     private static List<Referal> referals = new ArrayList<>();// Список игроков, для подсчёта времени игры
     private static DTRefSystem instance;
     private Database db;
@@ -52,7 +52,7 @@ public final class DTRefSystem extends Plugin  {
                 "\t`id` SERIAL NOT NULL PRIMARY KEY,\n" +
                 "\t`name` VARCHAR(255),\n" +
                 "\t`code` VARCHAR(255),\n" +
-                "\t`count_referlas` INT(11),\n" +
+                "\t`count_referals` INT(11),\n" +
                 "\t`uuid` VARCHAR(255),\n" +
                 "\tINDEX (`code`)\n" +
                 ")ENGINE=INNODB  DEFAULT CHARSET=UTF8  COLLATE UTF8_GENERAL_CI");
@@ -85,9 +85,13 @@ public final class DTRefSystem extends Plugin  {
         for (ProxiedPlayer player : getProxy().getPlayers()) {
             EventListener.quit(player);
         }
+        closeDB();
+    }
+    private static void closeDB() {
+
         try {
-            if (db != null) {
-                db.close();
+            if (getInstance().db != null) {
+                getInstance().db.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -144,6 +148,21 @@ public final class DTRefSystem extends Plugin  {
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, new File(getDataFolder(), "config.yml"));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void reload() {
+
+        for (ProxiedPlayer player : getInstance().getProxy().getPlayers()) {
+            EventListener.quit(player);
+        }
+
+        getInstance().reloadConfig();
+        closeDB();
+        getInstance().initDB();
+
+        for (ProxiedPlayer player : getInstance().getProxy().getPlayers()) {
+            EventListener.join(player);
         }
     }
 
@@ -232,10 +251,6 @@ public final class DTRefSystem extends Plugin  {
         }
     }
 
-    public static void sendReferalToDB() {
-
-    }
-
     public static boolean hasPermission(String playerName, String permission) {
         LuckPerms api = LuckPermsProvider.get();
         UserManager um = api.getUserManager();
@@ -247,31 +262,14 @@ public final class DTRefSystem extends Plugin  {
                 User user = userFuture.get();
                 if (user != null) {
                     Node node = Node.builder(permission).value(true).build();
-                    SortedSet<Node> nodes = user.resolveDistinctInheritedNodes(QueryOptions.builder(QueryMode.CONTEXTUAL).flag(Flag.RESOLVE_INHERITANCE, true).build());
-                    boolean has = false;
-                    for (Node n : nodes) {
-                        if (node.getKey().equalsIgnoreCase(n.getKey())) {
-                            if (n.isNegated() || !n.getValue()) {
-                                System.out.println(ChatColor.RED + "User " + playerName + " has permission " + permission + " negated!");
-                                return false;
-                            } else {
-                                has = true;
-                            }
-                        }
-                    }
-                    if (has) {
-                        System.out.println(ChatColor.GREEN + "User " + playerName + " has permission " + permission);
-                    } else {
-                        System.out.println(ChatColor.RED + "User " + playerName + " doesn't has permission " + permission);
-                    }
-                    return has;
-//                    else {
-//                        System.out.println(ChatColor.RED + "check group " + user.getPrimaryGroup());
-//                            if (api.getGroupManager().getGroup(user.getPrimaryGroup()).data().contains(node, predicate).asBoolean()) {
-//                            return true;
-//                        }
-//                        System.out.println(ChatColor.RED + "User " + playerName + " does not has permission " + permission );
-//                    }
+                    SortedSet<Node> nodes = user.resolveDistinctInheritedNodes(QueryOptions.builder(QueryMode.NON_CONTEXTUAL).flag(Flag.RESOLVE_INHERITANCE, true).build());
+
+                    ImmutableContextSet context = api.getContextManager().getContextSetFactory().immutableEmpty();
+                    Optional<Node> match = user.resolveInheritedNodes(QueryOptions.nonContextual()).stream()
+                            .filter(n -> n.getKey().equalsIgnoreCase(permission) && n.getContexts().equals(context))
+                            .findFirst();
+                    Tristate t = match.map(n -> Tristate.of(n.getValue())).orElse(Tristate.FALSE);
+                    return t.asBoolean();
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -299,9 +297,12 @@ public final class DTRefSystem extends Plugin  {
                 perm = key;
                 break;
             }
-            System.out.println(key + " = " +sect.getInt(key + ".coins"));
         }
 
         return getInstance().getConfig().getInt("rewards.referal." + perm + ".coins");
+    }
+
+    public static Set<String> getIgnoreList() {
+        return ignoreList;
     }
 }

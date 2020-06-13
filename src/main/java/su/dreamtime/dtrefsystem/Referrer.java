@@ -8,8 +8,13 @@ public class Referrer {
     private int referalsCount;
 
     private Referrer(String name, String code) {
+        this(name, code, 0);
+    }
+
+    public Referrer(String name, String code, int referalsCount) {
         this.name = name;
         this.code = code;
+        this.referalsCount = referalsCount;
     }
 
     public static Referrer createReferrer(String name) {
