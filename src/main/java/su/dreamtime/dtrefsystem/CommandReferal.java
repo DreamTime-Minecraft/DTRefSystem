@@ -245,8 +245,8 @@ public class CommandReferal extends Command implements TabExecutor {
                 }
 
                 output.add(new TextComponent(TextComponent.fromLegacyText("  §e→ §7За приглашение:")));
-                output.add(new TextComponent(TextComponent.fromLegacyText("    §6→ §7Вы получаете: §e" + referrerCoins + "§7 тк")));
-                output.add(new TextComponent(TextComponent.fromLegacyText("    §6→ §7Приглашённый: §e" + referalCoins + "§7 тк")));
+                output.add(new TextComponent(TextComponent.fromLegacyText("    §6→ §7Вы получаете: §e" + referrerCoins + "§7 поинтов")));
+                output.add(new TextComponent(TextComponent.fromLegacyText("    §6→ §7Приглашённый: §e" + referalCoins + "§7 поинтов")));
 
                 for (BaseComponent component : output) {
                     sender.sendMessage(component);
