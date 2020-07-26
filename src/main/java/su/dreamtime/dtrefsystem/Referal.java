@@ -79,7 +79,7 @@ public class Referal {
                     ProxiedPlayer referrerPlayer = ProxyServer.getInstance().getPlayer(rsReferrer.getString("name"));
                     if (referrerPlayer != null) {
                         if (!DTRefSystem.getIgnoreList().contains(referrerPlayer.getName())) {
-                            referrerPlayer.sendMessage(TextComponent.fromLegacyText(ChatColor.GREEN + "Отлично! Вы получили " + ChatColor.YELLOW + referalCoins + ChatColor.GREEN + " таймкоинов за приглашение игрока " + ChatColor.YELLOW + sender.getName() + ChatColor.GREEN + "!"));
+                            referrerPlayer.sendMessage(TextComponent.fromLegacyText(ChatColor.GREEN + "Отлично! Вы получили " + ChatColor.YELLOW + referrerCoins + ChatColor.GREEN + " таймкоинов за приглашение игрока " + ChatColor.YELLOW + sender.getName() + ChatColor.GREEN + "!"));
                         }
                     }
                     DTRefSystem.getInstance().getDb().execute("UPDATE `dtcoins` SET `coins` = `coins`+ ? WHERE `uuid` = ?;", referalCoins, sender.getUniqueId().toString());

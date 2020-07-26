@@ -196,6 +196,9 @@ public class CommandReferal extends Command implements TabExecutor {
                         ProxiedPlayer p = (ProxiedPlayer)sender;
                         Referal.use(p, args[1]);
                     }
+                } else {
+                    sender.sendMessage(TextComponent.fromLegacyText(ChatColor.RED+""+ChatColor.BOLD+"Введите код приглашения!"));
+                    sender.sendMessage(TextComponent.fromLegacyText(ChatColor.GRAY+"Для помощи по командам введите "+ChatColor.YELLOW+"/ref help"));
                 }
             } else if (args[0].equalsIgnoreCase("info")) {
 
