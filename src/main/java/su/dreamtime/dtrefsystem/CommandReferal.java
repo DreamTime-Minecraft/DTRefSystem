@@ -273,7 +273,7 @@ public class CommandReferal extends Command implements TabExecutor {
                     new TextComponent(TextComponent.fromLegacyText(
                             "§7Описание команды §e/ref§7:"+
                             "\n§eRefSystem §7- реферальная система сервера §9Dream§bTime§7,"+
-                            "\n§7благодаря которой можно заработать таймкоины за приглашения игроков на сервер!"+
+                            "\n§7благодаря которой можно заработать поинты за приглашения игроков на сервер!"+
                             "\n§7Всё очень §aпросто§7:")),
                     refcreate,
                     new TextComponent(TextComponent.fromLegacyText(
